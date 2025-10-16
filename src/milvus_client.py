@@ -23,14 +23,24 @@ class MilvusClient:
     def _connect(self):
         """连接到 Milvus 服务器"""
         try:
-            connections.connect(
-                alias="default",
-                host=self.config.MILVUS_HOST,
-                port=self.config.MILVUS_PORT,
-                user=self.config.MILVUS_USER,
-                password=self.config.MILVUS_PASSWORD
-            )
-            logger.info("成功连接到 Milvus 服务器")
+            # 检查是否使用 Milvus Lite（本地文件路径）
+            if self.config.MILVUS_HOST.endswith('.db') or '/' in self.config.MILVUS_HOST or '\\' in self.config.MILVUS_HOST:
+                # 使用 Milvus Lite（本地文件模式）
+                connections.connect(
+                    alias="default",
+                    uri=self.config.MILVUS_HOST
+                )
+                logger.info(f"成功连接到 Milvus Lite: {self.config.MILVUS_HOST}")
+            else:
+                # 使用远程 Milvus 服务器
+                connections.connect(
+                    alias="default",
+                    host=self.config.MILVUS_HOST,
+                    port=self.config.MILVUS_PORT,
+                    user=self.config.MILVUS_USER,
+                    password=self.config.MILVUS_PASSWORD
+                )
+                logger.info("成功连接到 Milvus 服务器")
         except Exception as e:
             logger.error(f"连接 Milvus 服务器失败: {e}")
             raise
