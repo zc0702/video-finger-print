@@ -48,7 +48,7 @@ class VideoDownloader:
     
     def download_from_url(self, url: str, filename: Optional[str] = None) -> str:
         """
-        从URL下载视频
+        从URL下载视频（智能判断使用yt-dlp或requests）
         
         Args:
             url: 视频URL
@@ -57,6 +57,20 @@ class VideoDownloader:
         Returns:
             下载后的文件路径
         """
+        # 判断是否为直接视频文件链接
+        video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm']
+        is_direct_link = any(url.lower().endswith(ext) for ext in video_extensions) or \
+                        any(ext in url.lower() for ext in video_extensions)
+        
+        # 先尝试直接下载（更快更稳定）
+        if is_direct_link:
+            try:
+                logger.info(f"检测到直接视频链接，使用 requests 下载: {url}")
+                return self.download_with_requests(url, filename)
+            except Exception as e:
+                logger.warning(f"requests 下载失败，尝试使用 yt-dlp: {e}")
+        
+        # 尝试使用 yt-dlp（支持视频平台）
         try:
             # 生成文件名
             if not filename:
@@ -70,17 +84,11 @@ class VideoDownloader:
                 'format': 'best[height<=720]',  # 限制分辨率以提高处理速度
                 'noplaylist': True,
                 'extract_flat': False,
+                'quiet': False,
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # 获取视频信息
-                info = ydl.extract_info(url, download=False)
-                title = info.get('title', 'unknown')
-                duration = info.get('duration', 0)
-                
-                logger.info(f"开始下载视频: {title}")
-                logger.info(f"视频时长: {duration}秒")
-                
+                logger.info(f"使用 yt-dlp 下载: {url}")
                 # 下载视频
                 ydl.download([url])
             
@@ -92,8 +100,9 @@ class VideoDownloader:
                 raise Exception("视频下载失败，文件不存在")
         
         except Exception as e:
-            logger.error(f"下载视频失败 {url}: {e}")
-            raise
+            logger.error(f"yt-dlp 下载失败，最后尝试 requests: {e}")
+            # 最后尝试用 requests
+            return self.download_with_requests(url, filename)
     
     def download_with_requests(self, url: str, filename: Optional[str] = None) -> str:
         """

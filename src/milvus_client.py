@@ -274,14 +274,16 @@ class MilvusClient:
             统计信息字典
         """
         try:
-            stats = self.collection.get_stats()
+            # 新版本使用 num_entities 属性
+            self.collection.load()
+            row_count = self.collection.num_entities
             return {
-                'row_count': stats.get('row_count', 0),
-                'data_size': stats.get('data_size', 0)
+                'row_count': row_count,
+                'data_size': 0  # Milvus Lite 不提供数据大小信息
             }
         except Exception as e:
             logger.error(f"获取集合统计信息失败: {e}")
-            return {}
+            return {'row_count': 0, 'data_size': 0}
     
     def close(self):
         """关闭连接"""
