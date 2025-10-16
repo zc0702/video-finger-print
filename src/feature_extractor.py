@@ -171,13 +171,21 @@ class FeatureExtractor:
         target_dim = self.config.DIMENSION
         
         if current_dim > target_dim:
-            # 特征维度太大，使用PCA降维
-            if not self.is_fitted:
-                self.pca = PCA(n_components=target_dim)
-                video_features = self.pca.fit_transform(video_features.reshape(1, -1)).flatten()
-                self.is_fitted = True
+            # 特征维度太大，需要降维
+            # 方法1: 如果有足够的帧，使用帧特征进行PCA
+            if len(frame_features) >= target_dim:
+                if not self.is_fitted:
+                    self.pca = PCA(n_components=target_dim)
+                    # 对所有帧特征进行降维，然后取平均
+                    reduced_features = self.pca.fit_transform(frame_features)
+                    video_features = np.mean(reduced_features, axis=0)
+                    self.is_fitted = True
+                else:
+                    reduced_features = self.pca.transform(frame_features)
+                    video_features = np.mean(reduced_features, axis=0)
             else:
-                video_features = self.pca.transform(video_features.reshape(1, -1)).flatten()
+                # 方法2: 简单截断或使用哈希降维
+                video_features = video_features[:target_dim]
         elif current_dim < target_dim:
             # 特征维度太小，使用零填充
             padding = np.zeros(target_dim - current_dim)
