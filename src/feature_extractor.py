@@ -166,14 +166,22 @@ class FeatureExtractor:
         # 合并统计特征
         video_features = np.concatenate([mean_features, std_features])
         
-        # 如果特征维度超过配置的维度，使用PCA降维
-        if len(video_features) > self.config.DIMENSION:
+        # 调整特征维度到目标维度
+        current_dim = len(video_features)
+        target_dim = self.config.DIMENSION
+        
+        if current_dim > target_dim:
+            # 特征维度太大，使用PCA降维
             if not self.is_fitted:
-                self.pca = PCA(n_components=self.config.DIMENSION)
+                self.pca = PCA(n_components=target_dim)
                 video_features = self.pca.fit_transform(video_features.reshape(1, -1)).flatten()
                 self.is_fitted = True
             else:
                 video_features = self.pca.transform(video_features.reshape(1, -1)).flatten()
+        elif current_dim < target_dim:
+            # 特征维度太小，使用零填充
+            padding = np.zeros(target_dim - current_dim)
+            video_features = np.concatenate([video_features, padding])
         
         return video_features
     

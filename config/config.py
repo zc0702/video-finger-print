@@ -25,6 +25,7 @@ class Config:
     SIMILARITY_THRESHOLD = float(os.getenv('SIMILARITY_THRESHOLD', '0.8'))
     
     # 视频处理配置
-    FRAME_INTERVAL = 30  # 每30帧提取一次特征
+    FRAME_INTERVAL = 15  # 每15帧提取一次特征（约每0.5秒1帧，30fps视频）
+    MIN_FRAMES = 5       # 最少提取帧数
     MAX_FRAMES = 100     # 最大提取帧数
     IMAGE_SIZE = (224, 224)  # 图像尺寸

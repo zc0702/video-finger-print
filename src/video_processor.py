@@ -43,6 +43,18 @@ class VideoProcessor:
             if not cap.isOpened():
                 raise ValueError(f"无法打开视频文件: {video_path}")
             
+            # 获取视频总帧数
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            
+            # 智能计算帧间隔
+            # 如果视频很短，减小间隔；如果很长，增大间隔
+            if total_frames < self.config.MIN_FRAMES * self.config.FRAME_INTERVAL:
+                # 视频太短，调整间隔确保至少提取 MIN_FRAMES 帧
+                frame_interval = max(1, total_frames // self.config.MIN_FRAMES)
+            else:
+                frame_interval = self.config.FRAME_INTERVAL
+            
             frames = []
             frame_count = 0
             extracted_count = 0
@@ -53,7 +65,7 @@ class VideoProcessor:
                     break
                 
                 # 每隔指定帧数提取一帧
-                if frame_count % self.config.FRAME_INTERVAL == 0:
+                if frame_count % frame_interval == 0:
                     # 调整图像尺寸
                     frame = cv2.resize(frame, self.config.IMAGE_SIZE)
                     frames.append(frame)
@@ -62,6 +74,21 @@ class VideoProcessor:
                 frame_count += 1
             
             cap.release()
+            
+            # 确保至少提取了最少帧数
+            if len(frames) < self.config.MIN_FRAMES and total_frames >= self.config.MIN_FRAMES:
+                # 重新打开视频，均匀采样
+                cap = cv2.VideoCapture(video_path)
+                frames = []
+                indices = np.linspace(0, total_frames - 1, self.config.MIN_FRAMES, dtype=int)
+                for idx in indices:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                    ret, frame = cap.read()
+                    if ret:
+                        frame = cv2.resize(frame, self.config.IMAGE_SIZE)
+                        frames.append(frame)
+                cap.release()
+            
             return frames
         
         finally:
