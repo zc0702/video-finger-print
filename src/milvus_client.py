@@ -101,11 +101,8 @@ class MilvusClient:
                 index_params=index_params
             )
             
-            # 为视频路径创建索引
-            self.collection.create_index(
-                field_name="video_path",
-                index_params={"index_type": "STL_SORT"}
-            )
+            # Milvus Lite 不支持标量字段索引，跳过
+            # 标量字段会自动支持查询，无需显式创建索引
             
             logger.info("成功创建索引")
         except Exception as e:
