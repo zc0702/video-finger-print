@@ -188,32 +188,51 @@ class MilvusClient:
             )
             
             # 处理结果
-            similar_videos = []
+            all_videos = []  # 所有搜索结果
+            similar_videos = []  # 满足阈值的相似视频
+            
             for hits in results:
                 for hit in hits:
                     # 计算相似度分数（L2距离转换为相似度）
                     distance = hit.distance
                     similarity = 1.0 / (1.0 + distance)  # 将距离转换为相似度
                     
+                    video_info = {
+                        'id': hit.id,
+                        'video_path': hit.entity.get('video_path'),
+                        'video_name': hit.entity.get('video_name'),
+                        'video_duration': hit.entity.get('video_duration'),
+                        'frame_count': hit.entity.get('frame_count'),
+                        'similarity': similarity,
+                        'distance': distance
+                    }
+                    
+                    all_videos.append(video_info)
+                    
                     # 应用阈值过滤
                     if score_threshold is None:
                         score_threshold = self.config.SIMILARITY_THRESHOLD
                     
                     if similarity >= score_threshold:
-                        similar_videos.append({
-                            'id': hit.id,
-                            'video_path': hit.entity.get('video_path'),
-                            'video_name': hit.entity.get('video_name'),
-                            'video_duration': hit.entity.get('video_duration'),
-                            'frame_count': hit.entity.get('frame_count'),
-                            'similarity': similarity,
-                            'distance': distance
-                        })
+                        similar_videos.append(video_info)
             
             # 按相似度排序
+            all_videos.sort(key=lambda x: x['similarity'], reverse=True)
             similar_videos.sort(key=lambda x: x['similarity'], reverse=True)
             
-            logger.info(f"找到 {len(similar_videos)} 个相似视频")
+            # 详细日志：显示所有搜索结果
+            if all_videos:
+                logger.info(f"搜索返回 {len(all_videos)} 个结果，其中 {len(similar_videos)} 个满足阈值 {score_threshold:.0%}：")
+                for idx, video in enumerate(all_videos, 1):
+                    match_status = "✓" if video['similarity'] >= score_threshold else "✗"
+                    video_url = video.get('video_path', 'Unknown')
+                    # 截断过长的URL，只显示前80个字符
+                    if len(video_url) > 80:
+                        video_url = video_url[:77] + "..."
+                    logger.info(f"  {match_status} {idx}. ID: {video['id']} | 相似度: {video['similarity']:.2%} | URL: {video_url}")
+            else:
+                logger.info(f"未找到任何相似视频")
+            
             return similar_videos
         
         except Exception as e:

@@ -1,11 +1,21 @@
-opencv-python==4.8.1.78
-numpy==1.24.3
-pymilvus==2.3.4
-Pillow==10.0.1
-scikit-learn==1.3.0
-matplotlib==3.7.2
-tqdm==4.66.1
-python-dotenv==1.0.0
-requests==2.31.0
-youtube-dl==2021.12.17
-yt-dlp==2023.12.30
+# 核心依赖
+opencv-python>=4.8.0,<5.0.0
+numpy>=1.24.0,<2.0.0
+pymilvus>=2.3.0,<3.0.0
+Pillow>=10.0.0,<11.0.0
+scikit-learn>=1.3.0,<2.0.0
+scikit-image>=0.21.0,<1.0.0
+python-dotenv>=1.0.0,<2.0.0
+requests>=2.31.0,<3.0.0
+
+# 视频下载（使用yt-dlp替代过时的youtube-dl）
+yt-dlp>=2023.12.0
+
+# 数据处理（CSV批处理需要）
+pandas>=2.0.0,<3.0.0
+
+# 进度显示
+tqdm>=4.66.0,<5.0.0
+
+# 可选：可视化
+matplotlib>=3.7.0,<4.0.0

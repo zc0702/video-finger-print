@@ -38,11 +38,15 @@ def search_command(args):
         )
         
         if results:
+            print("-" * 80)
+            print(results)
+            print("-" * 80)
             print(f"\n找到 {len(results)} 个相似视频:")
             print("-" * 80)
             for i, result in enumerate(results, 1):
-                print(f"{i}. {result['video_name']}")
+                print(f"{i}. {result['id']}: {result['video_name']}")
                 print(f"   相似度: {result['similarity']:.4f}")
+                print(f"   距离: {result['distance']:.4f}")
                 print(f"   路径: {result['video_path']}")
                 print(f"   时长: {result['video_duration']:.2f}秒")
                 print(f"   帧数: {result['frame_count']}")
