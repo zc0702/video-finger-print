@@ -196,6 +196,7 @@ class CSVVideoProcessor(BatchProcessingBase):
             # 使用锁保护 Milvus 操作（线程安全）
             with self._milvus_lock:
                 # 搜索相似视频（详细日志在 milvus_client 中输出）
+                logging.info(f"搜索相似视频: {url}")
                 similar_videos = self.milvus_client.search_similar_videos(
                     query_vector=feature_vector,
                     top_k=5,

@@ -226,9 +226,9 @@ class MilvusClient:
                 for idx, video in enumerate(all_videos, 1):
                     match_status = "✓" if video['similarity'] >= score_threshold else "✗"
                     video_url = video.get('video_path', 'Unknown')
-                    # 截断过长的URL，只显示前80个字符
-                    if len(video_url) > 80:
-                        video_url = video_url[:77] + "..."
+                    # 截断过长的URL，只显示前90个字符
+                    if len(video_url) > 90:
+                        video_url = video_url[:87] + "..."
                     logger.info(f"  {match_status} {idx}. ID: {video['id']} | 相似度: {video['similarity']:.2%} | URL: {video_url}")
             else:
                 logger.info(f"未找到任何相似视频")
