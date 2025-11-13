@@ -518,7 +518,7 @@ threshold = 0.85  # 标记中高度相似的
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-repo/video-finger-print.git
+git clone https://github.com/zc0702/video-finger-print.git
 cd video-finger-print
 
 # 创建虚拟环境
@@ -578,22 +578,6 @@ pytest tests/
 - [OpenCV Documentation](https://docs.opencv.org/) - 计算机视觉库
 - [Milvus Documentation](https://milvus.io/docs) - 向量数据库
 - [yt-dlp GitHub](https://github.com/yt-dlp/yt-dlp) - 视频下载工具
-
----
-
-## 📝 版本历史
-
-### v2.0.0 (2024-10-17) - 重构版
-- ✅ 专注于CSV URL批量处理
-- ✅ 删除本地视频批处理（简化）
-- ✅ 代码重构，继承基类（减少63%代码）
-- ✅ 标准化日志系统
-- ✅ 合并简化文档
-
-### v1.0.0 (2024-10-16)
-- ✅ 核心功能实现
-- ✅ 支持本地和URL视频
-- ✅ 批量处理支持
 
 ---
 
